@@ -95,6 +95,7 @@ body {
 /* Main Application Layout Shell */
 .app-shell {
     display: flex;
+    flex-direction: column;
     position: relative;
     z-index: 2;
     min-height: 100vh;
@@ -102,19 +103,20 @@ body {
 }
 
 /* ==========================================================================
-   NAVIGATION SYSTEMS (Sidebar / Mobile Bottombar)
+   NAVIGATION SYSTEMS (Top Header)
    ========================================================================== */
 .glass-nav {
-    width: 280px;
+    width: 100%;
     background: var(--glass-bg);
-    border-right: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
     backdrop-filter: blur(16px) saturate(180%);
     display: flex;
-    flex-direction: column;
-    padding: 32px 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
     position: sticky;
     top: 0;
-    height: 100vh;
     z-index: 10;
 }
 
@@ -122,8 +124,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 48px;
-    padding: 0 8px;
+    margin-bottom: 0;
 }
 
 .brand-logo {
@@ -157,54 +158,7 @@ body {
     margin-top: -2px;
 }
 
-.nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex-grow: 1;
-}
 
-.nav-btn {
-    background: transparent;
-    border: 1px solid transparent;
-    color: #94a3b8;
-    padding: 14px 18px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    font-family: var(--font-header);
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-align: left;
-    transition: var(--transition-smooth);
-}
-
-.nav-btn i {
-    width: 20px;
-    height: 20px;
-    transition: var(--transition-smooth);
-}
-
-.nav-btn:hover {
-    color: #ffffff;
-    background: var(--glass-highlight);
-    border-color: rgba(255, 255, 255, 0.03);
-}
-
-.nav-btn.active {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.06);
-    border-color: var(--glass-border);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1),
-                0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.nav-btn.active i {
-    color: var(--accent-cyan);
-    transform: scale(1.1);
-}
 
 .nav-footer {
     display: flex;
@@ -212,7 +166,10 @@ body {
     gap: 8px;
     font-size: 0.75rem;
     color: #64748b;
-    padding: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 245, 160, 0.05);
+    border: 1px solid rgba(0, 245, 160, 0.1);
 }
 
 .pulse-indicator {
@@ -245,7 +202,6 @@ body {
     flex-grow: 1;
     padding: 40px;
     overflow-y: auto;
-    height: 100vh;
 }
 
 .tab-content {
@@ -1603,70 +1559,25 @@ body {
 }
 
 @media (max-width: 768px) {
-    .app-shell {
-        flex-direction: column-reverse; /* Navigation moves to bottom */
-    }
-    
     .glass-nav {
-        width: 100%;
-        height: 68px;
-        flex-direction: row;
-        justify-content: space-around;
-        align-items: center;
-        padding: 0 12px;
-        position: fixed;
-        bottom: 0;
-        top: auto;
-        left: 0;
-        border-right: none;
-        border-top: 1px solid var(--glass-border);
-        border-radius: 16px 16px 0 0;
-        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+        padding: 16px 20px;
     }
     
-    .nav-logo {
-        display: none; /* Hide logo in mobile view for spacing */
+    .logo-text h1 {
+        font-size: 1.1rem;
     }
     
-    .nav-links {
-        flex-direction: row;
-        width: 100%;
-        justify-content: space-around;
-        gap: 0;
-    }
-    
-    .nav-btn {
-        padding: 8px 14px;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 0.65rem;
-        text-align: center;
-        flex-grow: 1;
-        border-radius: var(--radius-sm);
-    }
-    
-    .nav-btn i {
-        width: 18px;
-        height: 18px;
-    }
-    
-    .nav-btn.active {
-        background: transparent;
-        border-color: transparent;
-        box-shadow: none;
-    }
-    
-    .nav-btn.active i {
-        transform: scale(1.15);
+    .brand-logo {
+        width: 36px;
+        height: 36px;
     }
     
     .nav-footer {
-        display: none; /* Hide active indicator in mobile navigation */
+        display: none; /* Hide database indicator to save space on mobile */
     }
     
     .app-main-content {
-        padding: 24px 20px 88px 20px; /* Space on bottom for navigation offset */
-        height: calc(100vh - 68px);
+        padding: 24px 20px;
     }
     
     .view-header h2 {
