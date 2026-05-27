@@ -106,7 +106,10 @@ async function performStudentQuery(indexNo) {
     // 2. Fetch from Google Sheets Apps Script API
     try {
         const url = `${GOOGLE_SHEET_API}?index=${encodeURIComponent(indexNo)}`;
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            method: 'GET',
+            redirect: 'follow'
+        });
         
         if (response.ok) {
             const raw = await response.json();
