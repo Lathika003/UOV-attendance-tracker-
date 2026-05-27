@@ -396,7 +396,7 @@ function drawStudentAttendanceChart(subjectsData) {
     // Theme colors
     ctx.clearRect(0, 0, width, height);
 
-    const padding = { top: 30, right: 30, bottom: 40, left: 50 };
+    const padding = { top: 30, right: 30, bottom: 70, left: 50 };
     const chartWidth = width - padding.left - padding.right;
     const chartHeight = height - padding.top - padding.bottom;
 
@@ -467,10 +467,15 @@ function drawStudentAttendanceChart(subjectsData) {
         ctx.textAlign = "center";
         ctx.fillText(`${percent}%`, x + barWidth / 2, y - 10);
 
-        // Draw X-axis label code
+        // Draw X-axis label code vertically to prevent mobile overlapping
         ctx.fillStyle = "#cbd5e1";
         ctx.font = "500 10px Outfit";
-        ctx.fillText(code, x + barWidth / 2, padding.top + chartHeight + 16);
+        ctx.save();
+        ctx.translate(x + barWidth / 2, padding.top + chartHeight + 12);
+        ctx.rotate(-Math.PI / 2); // Rotate 90 degrees counter-clockwise
+        ctx.textAlign = "right"; // Right-align to hang from the axis
+        ctx.fillText(code, 0, 3); // Small Y-offset for centering with bar width
+        ctx.restore();
     });
 }
 
