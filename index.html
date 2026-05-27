@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0f19">
+    <meta name="description" content="A premium, state-of-the-art 3D attendance tracker for the Faculty of Applied Science, University of Vavuniya.">
+    <title>UOV FAS Attendance Tracker</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Libraries: Three.js and GSAP for beautiful 3D animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Styling stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- 3D Canvas Background -->
+    <canvas id="three-bg-canvas"></canvas>
+    
+    <!-- Ambient 3D Grid Overlay -->
+    <div class="interactive-overlay"></div>
+
+    <!-- Main Container -->
+    <div class="app-shell">
+        
+        <!-- Sidebar Navigation (Desktop) / Bottom Bar (Mobile) -->
+        <nav class="glass-nav">
+            <div class="nav-logo">
+                <img src="university_logo.png" alt="UOV Logo" class="brand-logo" />
+                <div class="logo-text">
+                    <h1>UOV FAS</h1>
+                    <span>ATTENDANCE</span>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <button class="nav-btn active" data-tab="student-portal" id="btn-student-portal">
+                    <i data-lucide="user-search"></i>
+                    <span>Student View</span>
+                </button>
+            </div>
+            
+            <div class="nav-footer">
+                <span class="pulse-indicator"></span>
+                <span>Active Database</span>
+            </div>
+        </nav>
+
+        <!-- Dynamic Content Area -->
+        <main class="app-main-content">
+            
+            <!-- Student Portal View (Search and Filter) -->
+            <section id="view-student-portal" class="tab-content active">
+                <header class="view-header">
+                    <h2>Student Portal</h2>
+                    <p>Enter an index number to instantly view subject-wise attendance and exam eligibility status.</p>
+                </header>
+
+                <!-- Search Interface -->
+                <div class="search-section glass-card">
+                    <div class="search-bar-wrapper">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="student-search-input" placeholder="Enter Index Number (e.g., 2021/ASP/01)" autocomplete="off">
+                        <button class="clear-btn" id="search-clear-btn" style="display: none;">
+                            <i data-lucide="x"></i>
+                        </button>
+                        <button class="submit-btn" id="search-submit-btn">
+                            <span>Submit</span>
+                        </button>
+                    </div>
+                    <!-- Autocomplete dropdown suggestions -->
+                    <div class="autocomplete-dropdown" id="search-suggestions"></div>
+                </div>
+
+                <!-- Empty State (Before search) -->
+                <div class="portal-empty-state" id="portal-empty">
+                    <div class="empty-state-orb">
+                        <i data-lucide="fingerprint"></i>
+                    </div>
+                    <h3>Waiting for Input</h3>
+                    <p>Type your University Index Number to initiate a 3D visual filter and query database logs.</p>
+                    <div class="suggested-tags">
+                        <span>Try typing:</span>
+                        <button class="tag-pill">2021/ASP/01</button>
+                        <button class="tag-pill">2021/ASP/12</button>
+                        <button class="tag-pill">2021/ASP/48</button>
+                    </div>
+                </div>
+
+                <!-- Student Profile Results (Hidden initially) -->
+                <div class="student-results-container" id="student-results" style="display: none;">
+                    <!-- Overview Profile Glass Card -->
+                    <div class="student-profile-hero glass-card">
+                        <div class="profile-main">
+                            <div class="profile-avatar-wrapper">
+                                <div class="avatar-ring" id="avatar-ring-status"></div>
+                                <div class="avatar-glow" id="avatar-glow-status"></div>
+                                <i data-lucide="user" class="avatar-icon"></i>
+                            </div>
+                            <div class="profile-details">
+                                <h3 id="res-student-name">--</h3>
+                                <span class="profile-index" id="res-student-index">--</span>
+                                <span class="profile-dept" id="res-student-dept">--</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Overall Circular Dial Gauge -->
+                        <div class="profile-score-gauge">
+                            <div class="gauge-svg-container">
+                                <svg class="circular-gauge" viewBox="0 0 100 100">
+                                    <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                                    <circle class="gauge-fill" id="res-gauge-fill" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="264"></circle>
+                                </svg>
+                                <div class="gauge-text">
+                                    <span class="gauge-num" id="res-gauge-percentage">0%</span>
+                                    <span class="gauge-label">Overall</span>
+                                </div>
+                            </div>
+                            <div class="eligibility-badge" id="res-eligibility-badge">
+                                --
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subject Breakdown Grid -->
+                    <div class="section-title">
+                        <h3>Subject-wise breakdown</h3>
+                        <span>Click cards to view full attendance history logs</span>
+                    </div>
+
+                    <div class="subjects-grid-cards" id="student-subjects-grid">
+                        <!-- Cards injected dynamically -->
+                    </div>
+
+                    <!-- Chart & Performance Trends -->
+                    <div class="glass-card performance-chart-card">
+                        <div class="card-header">
+                            <h3>Attendance Progress Chart</h3>
+                            <span class="subtitle">Visualizing attendance across active semesters</span>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="student-canvas-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+
+        </main>
+    </div>
+
+    <!-- Modals for History Detail View -->
+    <div class="modal-backdrop" id="history-modal">
+        <div class="modal-container glass-card">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-subject-title">Subject Details</h3>
+                    <span id="modal-subject-code">CO314</span>
+                </div>
+                <button class="modal-close" onclick="closeModal()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-summary-row">
+                    <div class="summary-pill present">
+                        <span class="num" id="modal-present-count">0</span>
+                        <span class="lbl">Present</span>
+                    </div>
+                    <div class="summary-pill absent">
+                        <span class="num" id="modal-absent-count">0</span>
+                        <span class="lbl">Absent</span>
+                    </div>
+                    <div class="summary-pill percent">
+                        <span class="num" id="modal-percentage">0%</span>
+                        <span class="lbl">Rate</span>
+                    </div>
+                </div>
+                
+                <h4 class="history-table-title">Full attendance log</h4>
+                <div class="history-table-wrapper">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Lecturer</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-table-body">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Notification System -->
+    <div id="alert-toast" class="alert-toast">
+        <div class="alert-toast-content">
+            <i data-lucide="check-circle" id="toast-icon"></i>
+            <span id="toast-message">Record saved successfully!</span>
+        </div>
+    </div>
+
+    <!-- Application scripts -->
+
+    <script src="js/three-scene.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
