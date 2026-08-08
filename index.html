@@ -415,8 +415,11 @@
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches
                           || window.navigator.standalone === true;
 
-        // Already installed as app — hide button
-        if (isStandalone) { fab.classList.add('hidden'); return; }
+        // Already installed — hide button permanently (localStorage + standalone check)
+        if (isStandalone || localStorage.getItem('uov_app_installed') === '1') {
+            fab.classList.add('hidden');
+            return;
+        }
 
         // PWA deferred prompt (Chrome / Edge / Android Chrome)
         let deferredPrompt = null;
@@ -427,6 +430,7 @@
         });
 
         window.addEventListener('appinstalled', () => {
+            localStorage.setItem('uov_app_installed', '1'); // remember permanently
             fab.classList.add('hidden');
             deferredPrompt = null;
         });
@@ -522,7 +526,10 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') fab.classList.add('hidden');
+                if (outcome === 'accepted') {
+                    localStorage.setItem('uov_app_installed', '1'); // remember permanently
+                    fab.classList.add('hidden');
+                }
                 deferredPrompt = null;
                 return;
             }
