@@ -79,6 +79,7 @@ body {
     height: 100vh;
     z-index: 0;
     pointer-events: none;
+    transition: opacity 0.8s ease;
 }
 
 .interactive-overlay {
@@ -90,6 +91,15 @@ body {
     z-index: 1;
     pointer-events: none;
     background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(6, 8, 20, 0.6) 100%);
+    transition: opacity 0.8s ease;
+}
+
+/* Clean Mode Overrides */
+body {
+    transition: background 0.8s ease;
+}
+body.clean-mode {
+    background: radial-gradient(circle at 50% 0%, #101726 0%, #060814 80%);
 }
 
 /* Main Application Layout Shell */
@@ -158,7 +168,11 @@ body {
     margin-top: -2px;
 }
 
-
+.nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
 
 .nav-footer {
     display: flex;
@@ -1570,6 +1584,10 @@ body {
     .brand-logo {
         width: 36px;
         height: 36px;
+    }
+    
+    .nav-controls {
+        gap: 8px;
     }
     
     .nav-footer {

@@ -216,9 +216,9 @@ class AttendanceThreeScene {
         const positionAttr = this.geometry.attributes.position;
         const colorAttr = this.geometry.attributes.color;
 
-        // Return camera to wide zoom position
+        const targetZ = this.isSimpleMode ? 45 : 30;
         gsap.to(this.camera.position, {
-            z: 30,
+            z: targetZ,
             duration: 2.0,
             ease: "power1.inOut"
         });
@@ -231,7 +231,11 @@ class AttendanceThreeScene {
 
             const ratio = Math.random();
             const cellColor = new THREE.Color();
-            cellColor.setHSL(0.55 + ratio * 0.1, 1.0, 0.5);
+            if (this.isSimpleMode) {
+                cellColor.setHSL(0.75 + ratio * 0.15, 0.9, 0.6); // Clean Mode Purple
+            } else {
+                cellColor.setHSL(0.55 + ratio * 0.1, 1.0, 0.5); // Normal Mode Cyan
+            }
 
             gsap.to(positionAttr.array, {
                 [i * 3]: origX,
@@ -251,11 +255,64 @@ class AttendanceThreeScene {
             });
         }
 
-        // Return material scale
+        const targetSize = this.isSimpleMode ? 0.4 : 0.55;
+        const targetOpacity = this.isSimpleMode ? 0.4 : 0.8;
         gsap.to(this.material, {
-            size: 0.55,
+            size: targetSize,
+            opacity: targetOpacity,
             duration: 1.5
         });
+    }
+
+    /**
+     * Toggles a minimal, extremely subtle 3D mode 
+     * @param {boolean} isSimple 
+     */
+    toggleSimpleMode(isSimple) {
+        this.isSimpleMode = isSimple;
+        const colorAttr = this.geometry.attributes.color;
+        
+        if (isSimple) {
+            // Clean mode: Move camera closer but reduce intensity, different colors
+            gsap.to(this.camera.position, { z: 45, duration: 2.0, ease: "power2.inOut" });
+            gsap.to(this.material, { opacity: 0.4, size: 0.4, duration: 2.0 });
+            this.scene.fog.density = 0.02; 
+            
+            // Morph to elegant purple/magenta theme
+            for (let i = 0; i < this.particleCount; i++) {
+                const ratio = Math.random();
+                const cleanColor = new THREE.Color();
+                cleanColor.setHSL(0.75 + ratio * 0.15, 0.9, 0.6); 
+                
+                gsap.to(colorAttr.array, {
+                    [i * 3]: cleanColor.r,
+                    [i * 3 + 1]: cleanColor.g,
+                    [i * 3 + 2]: cleanColor.b,
+                    duration: 2.0,
+                    onUpdate: () => { colorAttr.needsUpdate = true; }
+                });
+            }
+        } else {
+            // Restore normal dense particle look and colors
+            gsap.to(this.camera.position, { z: this.currentState === 'idle' ? 30 : 35, duration: 2.0, ease: "power2.inOut" });
+            gsap.to(this.material, { opacity: 0.8, size: this.currentState === 'idle' ? 0.55 : 0.60, duration: 2.0 });
+            this.scene.fog.density = 0.015;
+            
+            // Restore normal cyan/blue theme
+            for (let i = 0; i < this.particleCount; i++) {
+                const ratio = Math.random();
+                const normalColor = new THREE.Color();
+                normalColor.setHSL(0.55 + ratio * 0.1, 1.0, 0.5); 
+                
+                gsap.to(colorAttr.array, {
+                    [i * 3]: normalColor.r,
+                    [i * 3 + 1]: normalColor.g,
+                    [i * 3 + 2]: normalColor.b,
+                    duration: 2.0,
+                    onUpdate: () => { colorAttr.needsUpdate = true; }
+                });
+            }
+        }
     }
 
     /**
@@ -303,7 +360,11 @@ class AttendanceThreeScene {
 
         // Base continuous particle movement rotations
         if (this.particleSystem) {
-            if (this.currentState === 'idle') {
+            if (this.isSimpleMode) {
+                // Extremely slow drift for clean mode
+                this.particleSystem.rotation.y = timeSeconds * 0.015;
+                this.particleSystem.rotation.x = Math.sin(timeSeconds * 0.01) * 0.03;
+            } else if (this.currentState === 'idle') {
                 this.particleSystem.rotation.y = timeSeconds * 0.06;
                 this.particleSystem.rotation.x = Math.sin(timeSeconds * 0.04) * 0.08;
             } else {
